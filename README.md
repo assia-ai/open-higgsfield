@@ -96,8 +96,10 @@ Each generate is one object: `{ model, prompt, media, settings }`.
   no studio changes.
 - **Five small Zustand stores** — shared image/video prompt, shared image/video
   media, `settings[modelId]`, and a tiny `active` store. No store per model.
-- **Uploads** go client-direct to Vercel Blob through `/api/blob`, which issues
-  scoped tokens. `blob:` URLs are preview-only.
+- **Uploads** go client-direct to storage. `/api/upload` picks the store: with
+  `S3_*` set it signs a POST policy for an S3-compatible bucket (MinIO, R2, S3);
+  otherwise the client goes through `/api/blob`, which issues scoped Vercel Blob
+  tokens. `blob:` URLs are preview-only.
 
 ---
 
@@ -114,10 +116,37 @@ Open the studio, press **Add key**, and paste your platform key as `id:secret`.
 
 ```bash
 HF_API_BASE_URL=                      # generation API origin, server only
-OPEN_HIGGSFIELD_READ_WRITE_TOKEN=     # Vercel Blob read-write token
+OPEN_HIGGSFIELD_READ_WRITE_TOKEN=     # Vercel Blob read-write token (unless S3 is set)
+S3_ENDPOINT=                          # optional S3/MinIO API origin, replaces Vercel Blob
+S3_BUCKET=
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
+S3_REGION=                            # optional, default us-east-1
+S3_PUBLIC_URL=                        # optional, default S3_ENDPOINT/S3_BUCKET
+S3_MAX_UPLOAD_MB=                     # optional, default 500
 STUDIO_USERS=                         # optional login: "alice:pass1,bob:pass2"
 STUDIO_AUTH_SECRET=                   # required with STUDIO_USERS, 32+ random chars
 ```
+
+### S3 / MinIO storage (optional)
+
+Set `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`
+to store uploads in an S3-compatible bucket instead of Vercel Blob. The browser
+posts each file straight to the bucket with a short-lived signed policy that
+fixes its key, content type and maximum size (`S3_MAX_UPLOAD_MB`). URLs are
+path-style (`S3_ENDPOINT/S3_BUCKET/key`).
+
+The bucket needs:
+
+- **Anonymous read.** The generation API downloads every input from its public
+  URL, so objects must be readable from the internet — on MinIO,
+  `mc anonymous set download <alias>/<bucket>`. Set `S3_PUBLIC_URL` if objects
+  are served from another origin than the API.
+- **CORS for the studio's origin** on POST. MinIO allows every origin by default
+  (`MINIO_API_CORS_ALLOW_ORIGIN`).
+
+Anyone holding an object's URL can read it; keys start with a random device id
+and a random prefix, but they are not secret once shared.
 
 ### Login (optional)
 
@@ -155,8 +184,8 @@ build pack, expose port `3000`, set the environment variables above (add
 `NEXT_PUBLIC_SITE_URL` as a build variable.
 
 Serve it over HTTPS: in production the key and device cookies are `secure`, so
-a browser on plain `http://` will not keep them. Uploads still go to Vercel
-Blob, so the Blob token is needed for media inputs.
+a browser on plain `http://` will not keep them. For media inputs set either
+the Vercel Blob token or the `S3_*` variables (MinIO works).
 
 ---
 
