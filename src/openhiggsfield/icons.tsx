@@ -71,6 +71,14 @@ export function KeyIcon({ size = 15 }: IconProps) {
   );
 }
 
+export function SignOutIcon({ size = 15 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M6.5 2.5h-3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3M10.5 11 13.5 8l-3-3M13.3 8H6.5" />
+    </svg>
+  );
+}
+
 export function CaretDownIcon({ size = 10 }: IconProps) {
   return (
     <svg {...base(size)}>

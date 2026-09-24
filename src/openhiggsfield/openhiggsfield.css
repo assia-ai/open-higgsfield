@@ -2988,6 +2988,27 @@
   opacity: 0.45;
 }
 
+/* ---------- login ---------- */
+
+/* The same panel as the key modal, standing alone on the studio ground. */
+.ohf-login {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.ohf-login-panel {
+  animation: ohf-pop 0.28s var(--ease);
+}
+.ohf-login-panel .ohf-keys-title {
+  margin: 0;
+}
+.ohf-login-mark {
+  display: flex;
+  color: var(--accent);
+}
+
 /* ---------- viewer ---------- */
 
 /* The run opens at the size it was made at: the picture holds the full height

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { VIEWS, VIEW_LABELS, type GalleryView } from "./data";
-import { AssetsIcon, HeartIcon, ImageIcon, KeyIcon, VideoIcon } from "./icons";
+import { AssetsIcon, HeartIcon, ImageIcon, KeyIcon, SignOutIcon, VideoIcon } from "./icons";
 
 const VIEW_ICONS: Record<GalleryView, () => React.ReactNode> = {
   image: () => <ImageIcon />,
@@ -18,12 +18,17 @@ export function Topbar({
   busy,
   keyConfigured,
   onKeys,
+  user,
+  onSignOut,
 }: {
   view: GalleryView;
   onView: (next: GalleryView) => void;
   busy: boolean;
   keyConfigured: boolean;
   onKeys: () => void;
+  /** Set only when the studio is behind a login. */
+  user: string | null;
+  onSignOut: () => void;
 }) {
   const tabsRef = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
@@ -137,6 +142,17 @@ export function Topbar({
           <span className="ohf-key-text">{keyConfigured ? "Your key" : "Add key"}</span>
           <span className="ohf-lamp" />
         </button>
+        {user && (
+          <button
+            type="button"
+            className="ohf-key"
+            onClick={onSignOut}
+            aria-label={`Sign out ${user}`}
+            title={`Signed in as ${user} — sign out`}
+          >
+            <SignOutIcon />
+          </button>
+        )}
       </div>
     </div>
   );

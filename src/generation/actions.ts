@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 
+import { requireSession } from "@/auth/guard";
+
 import { getModel, parseSettings } from "./catalog";
 import type { GenerationPlane } from "./catalog/types";
 import {
@@ -17,12 +19,14 @@ import type { StatusResult } from "./platform";
 import { toPlatform } from "./to-platform";
 
 export async function savePlatformCredentials(data: unknown) {
+  await requireSession();
   const { apiKey } = parseCredentialInput(data);
   const jar = await cookies();
   jar.set(PLATFORM_KEY_COOKIE, encodeCredentials(apiKey), PLATFORM_KEY_COOKIE_OPTIONS);
 }
 
 export async function clearPlatformCredentials() {
+  await requireSession();
   const jar = await cookies();
   jar.set(PLATFORM_KEY_COOKIE, "", { ...PLATFORM_KEY_COOKIE_OPTIONS, maxAge: 0 });
 }
@@ -60,6 +64,7 @@ export async function getGenerationStatuses(data: unknown): Promise<StatusResult
 }
 
 async function readStoredCredentials() {
+  await requireSession();
   const jar = await cookies();
   return decodeCredentials(jar.get(PLATFORM_KEY_COOKIE)?.value);
 }
