@@ -9,6 +9,7 @@ import {
   blobPathname,
   resolveDeviceId,
 } from "@/generation/device";
+import { UPLOAD_CONTENT_TYPES } from "@/generation/upload-policy";
 
 // With STUDIO_USERS set only signed-in users reach this; otherwise anyone can upload.
 
@@ -35,15 +36,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async (pathname) => {
         console.info("[blob] token", { pathname });
         return {
-          allowedContentTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif",
-            "video/mp4",
-            "audio/wav",
-            "audio/x-wav",
-          ],
+          allowedContentTypes: UPLOAD_CONTENT_TYPES,
           addRandomSuffix: true,
         };
       },
