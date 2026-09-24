@@ -115,7 +115,20 @@ Open the studio, press **Add key**, and paste your platform key as `id:secret`.
 ```bash
 HF_API_BASE_URL=                      # generation API origin, server only
 OPEN_HIGGSFIELD_READ_WRITE_TOKEN=     # Vercel Blob read-write token
+STUDIO_USERS=                         # optional login: "alice:pass1,bob:pass2"
+STUDIO_AUTH_SECRET=                   # required with STUDIO_USERS, 32+ random chars
 ```
+
+### Login (optional)
+
+With `STUDIO_USERS` unset the studio is open to anyone who can reach it. Set it
+to close the studio behind a sign-in page: every page, upload and server action
+then needs a session. Sessions are HMAC-signed cookies that last 14 days and are
+signed with `STUDIO_AUTH_SECRET` (generate one with `openssl rand -base64 48`).
+Changing the secret signs everyone out; removing a user from `STUDIO_USERS`
+signs that user out. Passwords cannot contain a comma. If `STUDIO_USERS` is set
+without a usable secret, the server refuses every request instead of staying
+open. Failed sign-ins are throttled per address (10 per 15 minutes, in memory).
 
 ### Commands
 
@@ -137,8 +150,9 @@ docker run -p 3000:3000 -e HF_API_BASE_URL=... -e OPEN_HIGGSFIELD_READ_WRITE_TOK
 ```
 
 On Coolify, create an application from this repository with the **Dockerfile**
-build pack, expose port `3000`, set the two environment variables above and,
-optionally, `NEXT_PUBLIC_SITE_URL` as a build variable.
+build pack, expose port `3000`, set the environment variables above (add
+`STUDIO_USERS` and `STUDIO_AUTH_SECRET` for a private studio) and, optionally,
+`NEXT_PUBLIC_SITE_URL` as a build variable.
 
 Serve it over HTTPS: in production the key and device cookies are `secure`, so
 a browser on plain `http://` will not keep them. Uploads still go to Vercel

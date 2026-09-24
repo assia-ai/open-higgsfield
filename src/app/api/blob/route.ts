@@ -2,6 +2,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { NotSignedInError, requireSession } from "@/auth/guard";
 import {
   DEVICE_COOKIE,
   DEVICE_COOKIE_OPTIONS,
@@ -9,9 +10,15 @@ import {
   resolveDeviceId,
 } from "@/generation/device";
 
-// Anyone who can hit this route can upload. Gate it when auth exists.
+// With STUDIO_USERS set only signed-in users reach this; otherwise anyone can upload.
 
 export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    await requireSession();
+  } catch (error) {
+    if (error instanceof NotSignedInError) return new NextResponse(null, { status: 401 });
+    throw error;
+  }
   const incoming = (await request.json()) as HandleUploadBody;
   const device =
     incoming.type === "blob.generate-client-token" ? await readDeviceId() : null;

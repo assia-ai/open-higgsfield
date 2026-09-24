@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { getSessionUser, logout } from "@/auth/actions";
 import { hasPlatformCredentials, submitGeneration } from "@/generation/actions";
 import { MissingCredentialsError } from "@/generation/credentials";
 import { MODELS, getModel } from "@/generation/catalog";
@@ -180,6 +181,7 @@ export function OpenHiggsfieldApp({ fontClassName = "" }: { fontClassName?: stri
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState<SaveProgress | null>(null);
   const [keyConfigured, setKeyConfigured] = useState(false);
+  const [user, setUser] = useState<string | null>(null);
   const [keysOpen, setKeysOpen] = useState(false);
 
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -221,6 +223,7 @@ export function OpenHiggsfieldApp({ fontClassName = "" }: { fontClassName?: stri
   }, [historyLoaded, history]);
 
   useEffect(() => {
+    void getSessionUser().then(setUser);
     void hasPlatformCredentials().then((ready) => {
       setKeyConfigured(ready);
       if (!ready) setKeysOpen(true);
@@ -630,6 +633,8 @@ export function OpenHiggsfieldApp({ fontClassName = "" }: { fontClassName?: stri
             busy={busy}
             keyConfigured={keyConfigured}
             onKeys={openKeys}
+            user={user}
+            onSignOut={() => void logout()}
           />
 
           <Gallery
