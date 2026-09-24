@@ -126,6 +126,24 @@ OPEN_HIGGSFIELD_READ_WRITE_TOKEN=     # Vercel Blob read-write token
 | `pnpm start` | Serve the production build |
 | `pnpm brand` | Rebuild the icons and OG card in `public/` |
 
+### Self-hosting with Docker (Coolify)
+
+The `Dockerfile` builds a production image that serves the studio on port
+3000.
+
+```bash
+docker build --build-arg NEXT_PUBLIC_SITE_URL=https://studio.example.com -t openhiggsfield .
+docker run -p 3000:3000 -e HF_API_BASE_URL=... -e OPEN_HIGGSFIELD_READ_WRITE_TOKEN=... openhiggsfield
+```
+
+On Coolify, create an application from this repository with the **Dockerfile**
+build pack, expose port `3000`, set the two environment variables above and,
+optionally, `NEXT_PUBLIC_SITE_URL` as a build variable.
+
+Serve it over HTTPS: in production the key and device cookies are `secure`, so
+a browser on plain `http://` will not keep them. Uploads still go to Vercel
+Blob, so the Blob token is needed for media inputs.
+
 ---
 
 ## Layout
